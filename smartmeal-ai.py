@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 
 # Hugging Face API information
-API_URL = "https://api-inference.huggingface.co/models/gpt2"
+API_URL = "https://huggingface.co/distilbert/distilbert-base-uncased"
 headers = {"Authorization": "Bearer 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"}
 
 # Function to get meal plan with descriptions from Hugging Face
