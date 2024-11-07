@@ -1,19 +1,21 @@
 import streamlit as st
-import requests
+from transformers import AutoTokenizer, AutoModelForCausalLM
+import torch
 
-# Hugging Face API information
-API_URL = "https://huggingface.co/distilbert/distilbert-base-uncased"
-headers = {"Authorization": "Bearer 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"}
+# Load the model and tokenizer
+tokenizer = AutoTokenizer.from_pretrained("google/gemma-7b")
+model = AutoModelForCausalLM.from_pretrained("google/gemma-7b")
 
-# Function to get meal plan with descriptions from Hugging Face
+# Function to get meal plan with descriptions using local model
 def get_meal_plan_with_descriptions(calories, restrictions):
-    prompt = (f"Generate a meal plan for a whole day with approximately {calories} calories. "
-              f"Each meal should come with a brief description. Dietary restrictions: {', '.join(restrictions)}.")
-    response = requests.post(API_URL, headers=headers, json={"inputs": prompt})
-    if response.ok:
-        meal_plan = response.json()[0]["generated_text"]
-    else:
-        meal_plan = "Meal plan could not be generated."
+    prompt = (f"Create a balanced meal plan for a whole day with about {calories} calories, "
+              f"including breakfast, lunch, and dinner. Each meal should come with a description. "
+              f"Dietary restrictions to follow: {', '.join(restrictions)}.")
+    
+    inputs = tokenizer(prompt, return_tensors="pt")
+    outputs = model.generate(inputs.input_ids, max_length=200, num_return_sequences=1, temperature=0.7)
+    meal_plan = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    
     return meal_plan
 
 # Calorie calculation function
